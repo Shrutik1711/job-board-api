@@ -1,13 +1,24 @@
 from dotenv import load_dotenv
-from flask import Flask  , jsonify, request
+from flask import Flask, jsonify, request
 import os
+import certifi
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.engine import URL
 
 app = Flask(__name__)
 load_dotenv()
-db_password = os.getenv('DB_PASSWORD')
 
-app.config['SQLALCHEMY_DATABASE_URI']=  f"mysql+pymysql://root:{db_password}@localhost/jobboard"
+app.config['SQLALCHEMY_DATABASE_URI'] = URL.create(
+    "mysql+pymysql",
+    username=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    host=os.getenv("DB_HOST"),
+    port=4000,
+    database=os.getenv("DB_NAME"),
+)
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "connect_args": {"ssl": {"ca": certifi.where()}}
+}
 db = SQLAlchemy(app)
 
 class User(db.Model) :
